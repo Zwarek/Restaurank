@@ -1,12 +1,13 @@
-FROM node:20-alpine
+FROM node:24-slim
 
 WORKDIR /app
 
 COPY package*.json ./
+
 RUN npm install
-RUN npm install -g vite
 
 COPY . .
 
 EXPOSE 5173
-CMD ["vite", "--host"]
+
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0"]
