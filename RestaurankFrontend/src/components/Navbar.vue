@@ -1,6 +1,8 @@
 <template>
   <nav class="navbar-custom flex justify-between items-center w-full">
-    <div class="text-2xl font-bold">Restaurank 🍽️</div>
+    <div class="flex items-center">
+      <img src="../assets/logo.svg" alt="Logo Restaurank" class="logo-img" />
+    </div>
     <div class="flex items-center space-x-4">
       <input
           type="text"
