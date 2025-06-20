@@ -1,0 +1,20 @@
+# Node.js
+node_modules/
+dist/
+.DS_Store
+
+# Python / Django
+__pycache__/
+*.py[cod]
+*.sqlite3
+.env
+
+# Vite/Frontend
+.vite/
+*.log
+
+# MacOS / systemowe
+.DS_Store
+
+# Docker volumes
+volumes/
