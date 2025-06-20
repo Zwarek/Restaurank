@@ -1,104 +1,104 @@
 <template>
-  <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-    <div class="bg-[#5D16A6] text-white rounded-xl p-6 w-full max-w-md relative shadow-lg">
-      <button class="absolute top-3 right-4 text-white text-xl" @click="$emit('close')">✖</button>
-      <h2 class="text-center text-2xl font-bold mb-4 text-[#F7B801]">Rejestracja</h2>
+  <div class="fixed inset-0 flex items-center justify-center z-50">
+    <div class="fixed inset-0 bg-black opacity-40"></div>
+    <div class="bg-purple-800 text-white p-6 rounded-2xl z-50 w-[90%] max-w-lg relative shadow-lg">
+      <button class="absolute top-2 right-3 text-white text-xl" @click="$emit('close')">×</button>
+      <h2 class="text-2xl font-bold mb-4 text-center text-white">Rejestracja</h2>
 
-      <input v-model="firstName" placeholder="Imię" class="input-field" required />
-      <input v-model="lastName" placeholder="Nazwisko" class="input-field" required />
-      <input v-model="username" placeholder="Nazwa użytkownika" class="input-field" required />
-      <input v-model="email" type="email" placeholder="Email" class="input-field" required />
+      <div class="space-y-3">
+        <input v-model="formData.firstName" type="text" placeholder="Imię" class="input-style" />
+        <input v-model="formData.lastName" type="text" placeholder="Nazwisko" class="input-style" />
+        <input v-model="formData.username" type="text" placeholder="Nazwa użytkownika" class="input-style" />
+        <input v-model="formData.email" type="email" placeholder="Email" class="input-style" />
 
-      <div class="flex gap-2">
-        <input v-model="password" type="password" placeholder="Hasło" class="input-field w-1/2" required />
-        <input v-model="confirmPassword" type="password" placeholder="Potwierdź hasło" class="input-field w-1/2" required />
+        <div class="flex gap-2">
+          <input v-model="formData.password" type="password" placeholder="Hasło" class="input-style w-1/2" />
+          <input v-model="formData.confirmPassword" type="password" placeholder="Powtórz hasło" class="input-style w-1/2" />
+        </div>
+
+        <div class="flex flex-wrap gap-4 text-sm px-1 py-2">
+          <div class="w-[48%] space-y-1">
+            <p :class="ruleClass(passwordRules.length)">✔ Min. 8 znaków</p>
+            <p :class="ruleClass(passwordRules.uppercase)">✔ Wielka litera (A–Z)</p>
+            <p :class="ruleClass(passwordRules.special)">✔ Znak specjalny (!@#)</p>
+          </div>
+          <div class="w-[48%] space-y-1">
+            <p :class="ruleClass(passwordRules.lowercase)">✔ Mała litera (a–z)</p>
+            <p :class="ruleClass(passwordRules.digit)">✔ Cyfra (0–9)</p>
+            <p :class="ruleClass(passwordRules.match)">✔ Hasła są identyczne</p>
+          </div>
+        </div>
+
+        <select v-model="formData.country" class="input-style text-black">
+          <option disabled value="">Wybierz kraj</option>
+          <option v-for="(info, code) in countryList" :key="code" :value="info.name">
+            {{ info.name }}
+          </option>
+        </select>
+
+        <div class="flex gap-2">
+          <input v-model="formData.postcode" type="text" placeholder="Kod pocztowy" class="input-style w-1/2" />
+          <input v-model="formData.city" type="text" placeholder="Miasto" class="input-style w-1/2" />
+        </div>
+
+        <input v-model="formData.street" type="text" placeholder="Ulica i numer" class="input-style" />
+
+        <button @click="register" class="w-full bg-orange-500 text-white py-2 rounded-md font-semibold hover:bg-orange-600 transition">Zarejestruj się</button>
+
+        <p v-if="error" class="text-red-400 text-sm pt-1 text-center">Błąd podczas rejestracji.</p>
       </div>
-
-      <div class="grid grid-cols-2 gap-x-4 text-sm mt-2">
-        <p :class="passwordCriteria.length ? 'text-green-400' : 'text-gray-300'">✔️ Min. 8 znaków</p>
-        <p :class="passwordCriteria.lowercase ? 'text-green-400' : 'text-gray-300'">✔️ Mała litera (a–z)</p>
-        <p :class="passwordCriteria.uppercase ? 'text-green-400' : 'text-gray-300'">✔️ Wielka litera (A–Z)</p>
-        <p :class="passwordCriteria.number ? 'text-green-400' : 'text-gray-300'">✔️ Cyfra (0–9)</p>
-        <p :class="passwordCriteria.special ? 'text-green-400' : 'text-gray-300'">✔️ Znak specjalny (!@#)</p>
-        <p :class="passwordCriteria.match ? 'text-green-400' : 'text-gray-300'">✔️ Hasła są identyczne</p>
-      </div>
-
-      <select v-model="country" class="input-field mt-3" required>
-        <option disabled value="">Wybierz kraj</option>
-        <option v-for="(c, code) in countries" :key="code" :value="c.name">
-          {{ c.name }}
-        </option>
-      </select>
-
-      <div class="flex gap-2">
-        <input v-model="postalCode" placeholder="Kod pocztowy" class="input-field w-1/3" required />
-        <input v-model="city" placeholder="Miasto" class="input-field w-2/3" required />
-      </div>
-
-      <input v-model="street" placeholder="Ulica i numer domu" class="input-field" required />
-
-      <button @click="handleRegister" class="bg-[#F18701] text-white font-semibold w-full mt-4 py-2 rounded-lg hover:bg-orange-600">
-        Zarejestruj się
-      </button>
-
-      <p v-if="error" class="text-red-400 text-sm text-center mt-2">{{ error }}</p>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue'
-import { useAuth } from '@/composables/useAuth.js'
 import { countries } from 'countries-list'
 
-const { registerUser, error } = useAuth()
+const formData = ref({
+  firstName: '',
+  lastName: '',
+  username: '',
+  email: '',
+  password: '',
+  confirmPassword: '',
+  country: '',
+  postcode: '',
+  city: '',
+  street: ''
+})
 
-const firstName = ref('')
-const lastName = ref('')
-const username = ref('')
-const email = ref('')
-const password = ref('')
-const confirmPassword = ref('')
-const country = ref('')
-const city = ref('')
-const postalCode = ref('')
-const street = ref('')
+const error = ref(false)
+const countryList = countries
 
-const passwordCriteria = computed(() => ({
-  length: password.value.length >= 8,
-  lowercase: /[a-z]/.test(password.value),
-  uppercase: /[A-Z]/.test(password.value),
-  number: /[0-9]/.test(password.value),
-  special: /[!@#$%^&*(),.?":{}|<>]/.test(password.value),
-  match: password.value !== '' && password.value === confirmPassword.value
-}))
-
-const handleRegister = async () => {
-  const userData = {
-    firstName: firstName.value,
-    lastName: lastName.value,
-    username: username.value,
-    email: email.value,
-    password: password.value,
-    confirmPassword: confirmPassword.value,
-    address: {
-      street: street.value,
-      city: city.value,
-      postalCode: postalCode.value,
-      country: country.value,
-    },
+const passwordRules = computed(() => {
+  const p = formData.value.password
+  return {
+    length: p.length >= 8,
+    uppercase: /[A-Z]/.test(p),
+    lowercase: /[a-z]/.test(p),
+    digit: /[0-9]/.test(p),
+    special: /[!@#]/.test(p),
+    match: p === formData.value.confirmPassword
   }
+})
 
-  const success = await registerUser(userData)
-  if (success) {
-    alert('Rejestracja zakończona sukcesem!')
-    window.location.reload()
+function ruleClass(valid) {
+  return valid ? 'text-green-400' : 'text-red-400'
+}
+
+function register() {
+  if (Object.values(passwordRules.value).every(Boolean)) {
+    console.log('Dane do rejestracji:', formData.value)
+    error.value = false
+  } else {
+    error.value = true
   }
 }
 </script>
 
 <style scoped>
-.input-field {
-  @apply w-full px-4 py-2 mt-2 rounded-md text-black focus:outline-none focus:ring-2 focus:ring-[#F7B801];
+.input-style {
+  @apply w-full px-3 py-2 rounded-md text-black focus:outline-none;
 }
 </style>

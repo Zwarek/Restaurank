@@ -1,58 +1,27 @@
 import { ref } from 'vue'
 
-const error = ref(null)
+const isLoggedIn = ref(localStorage.getItem('isLoggedIn') === 'true')
+const userData = ref(JSON.parse(localStorage.getItem('userData')) || null)
 
 export function useAuth() {
-    const registerUser = async (userData) => {
-        error.value = null
-
-        if (userData.password !== userData.confirmPassword) {
-            error.value = 'Hasła nie są takie same.'
-            return false
-        }
-
-        try {
-            const response = await fetch('http://localhost:8000/api/register/', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(userData),
-            })
-
-            if (!response.ok) {
-                const resData = await response.json()
-                error.value = resData.detail || 'Błąd podczas rejestracji.'
-                return false
-            }
-
-            return true
-        } catch (err) {
-            error.value = 'Nie udało się połączyć z serwerem.'
-            return false
-        }
+    function login(user) {
+        isLoggedIn.value = true
+        userData.value = user
+        localStorage.setItem('isLoggedIn', 'true')
+        localStorage.setItem('userData', JSON.stringify(user))
     }
 
-    return { registerUser, error }
-}
+    function logout() {
+        isLoggedIn.value = false
+        userData.value = null
+        localStorage.removeItem('isLoggedIn')
+        localStorage.removeItem('userData')
+    }
 
-export async function loginUser(credentials) {
-    try {
-        const response = await fetch("http://localhost:8000/api/login", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify(credentials),
-        });
-
-        const data = await response.json();
-
-        if (!response.ok) {
-            throw new Error(data.message || "Błędne dane logowania.");
-        }
-
-        return { success: true, user: data.user };
-    } catch (error) {
-        return { success: false, message: error.message };
+    return {
+        isLoggedIn,
+        userData,
+        login,
+        logout
     }
 }
-

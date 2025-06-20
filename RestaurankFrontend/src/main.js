@@ -4,8 +4,6 @@ import router from './router';
 import './styles/tailwind.css';
 import './styles/leaflet.css'
 import './styles/navbar.css'
-import './styles/logo.css'
-import './styles/modal.css'
 
 const app = createApp(App);
 
